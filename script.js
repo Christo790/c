@@ -1,20 +1,30 @@
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 3000;
+const messageContainer = document.getElementById('message-container');
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
 
-app.use(express.json());
+messageForm.addEventListener('submit', sendMessage);
 
-app.post('/send-message', (req, res) => {
-  const { message } = req.body;
-
-  // Handle the message (e.g., send it to the recipient(s) using a suitable method)
+function sendMessage(event) {
+  event.preventDefault();
   
-  // Respond with a success message
-  res.json({ message: 'Message sent successfully' });
-});
+  const message = messageInput.value;
 
-app.use(express.static('public'));
-
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+  // Send the message to the server
+  fetch('/send-message', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ message })
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Append the new message to the container
+      const newMessage = document.createElement('div');
+      newMessage.innerText = data.message;
+      messageContainer.appendChild(newMessage);
+      
+      // Clear the input field
+      messageInput.value = '';
+    });
+}
